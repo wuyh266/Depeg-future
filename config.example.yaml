@@ -1,0 +1,340 @@
+# TheGraph API Key (顶层兼容)
+THE_GRAPH_API_KEY: ""
+
+# TheGraph subgraph URLs
+subgraph: "https://gateway.thegraph.com/api/subgraphs/id/EYCKATKGBKLWvSfwvBjzfCBmGwYNdVkduYXVivCsLRFu"
+subgraph_uniswap_v4: "https://gateway.thegraph.com/api/subgraphs/id/DiYPVdygkfjDWhbxGSqAQxwBKmfKnkWQojqeM2rkLb3G"
+subgraph_uniswap_v3: "https://gateway.thegraph.com/api/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV"
+pools: ["0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852"]
+
+thegraph:
+  subgraph_v2: "https://gateway.thegraph.com/api/subgraphs/id/EYCKATKGBKLWvSfwvBjzfCBmGwYNdVkduYXVivCsLRFu"
+  api_key: ""
+
+# Network proxy settings (for fetch.py, client.py, fetch_ohlcv.py)
+proxy:
+  http: ""
+  https: ""
+
+# API keys
+api_keys:
+  the_graph: ""
+  the_graph_token: ""
+  etherscan: ""
+
+# RPC URLs
+rpc:
+  ethereum: "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+
+# Network request settings
+network:
+  max_retries: 3
+  retry_delay: 5
+  timeout: 60
+
+# Stablecoins with independent time ranges for each coin
+# Time range: before depeg event to after depeg event
+stablecoins:
+  # USDC - March 2023 SVB event, brief depeg
+  - name: USDC
+    coingecko_id: usd-coin
+    anchor: 1.0
+    token_id: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    binance: "USDCUSDT"
+    coinbase: "USDT-USDC"
+    start: "2023-02-15"
+    end: "2023-04-15"
+
+  # USDT
+  - name: USDT
+    coingecko_id: tether
+    anchor: 1.0
+    token_id: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    start: "2023-02-01"
+    end: "2023-04-01"
+
+  # DAI
+  - name: DAI
+    coingecko_id: dai
+    anchor: 1.0
+    token_id: "0x6b175474e89094c44da98b954eedeac495271d0f"
+    start: "2023-02-01"
+    end: "2023-04-01"
+
+  # UST - May 2022 algorithmic stablecoin collapse
+  - name: UST
+    coingecko_id: terrausd
+    anchor: 1.0
+    token_id: "0xa47c8bf37f92abed4a126bda80778bb0c0978409"
+    start: "2022-04-01"
+    end: "2022-07-01"
+
+  # FRAX - 2022年5月受UST崩盘影响
+  - name: FRAX
+    coingecko_id: frax
+    anchor: 1.0
+    token_id: "0x853d955acef822db058eb8505911ed77f175b99e"
+    binance: "FRAXUSDT"
+    start: "2022-04-01"
+    end: "2022-08-01"
+
+  # TUSD
+  - name: TUSD
+    coingecko_id: true-usd
+    anchor: 1.0
+    token_id: "0x0000000000085d4780b73119b644ae5ecd22b376"
+    binance: "TUSDUSDT"
+    start: "2023-02-01"
+    end: "2023-04-01"
+
+  # sUSDE - Ethena Staked USDe
+  - name: sUSDE
+    coingecko_id: ethena-s-usde
+    anchor: 1.0
+    token_id: "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+    start: "2024-07-01"
+    end: "2024-09-01"
+    tvl_reference_time: "2024-08-01"
+
+  # USDe - October 2025 brief depeg
+  - name: USDe
+    coingecko_id: ethena-usde
+    anchor: 1.0
+    token_id: "0x4c9edd5852cd905f086c759e8383e09bff1e68b3"
+    binance: "USDEUSDT"
+    start: "2025-09-01"
+    end: "2025-11-01"
+
+  # xUSD - November 2025 depeg
+  - name: xUSD
+    coingecko_id: xusd
+    anchor: 1.0
+    token_id: "0xfd0865ca7b5dce2fad7bd0b823e33a54e6d4d052"
+    start: "2025-10-01"
+    end: "2025-12-01"
+
+  # IRON (Iron Finance) - May 2021 depeg
+  - name: IRON
+    coingecko_id: iron-stablecoin
+    anchor: 1.0
+    token_id: "0x3d495ee4c1b6d85551b1f74873e01d52a4f4d3c7"
+    start: "2021-04-01"
+    end: "2021-06-01"
+
+  # USDN (Waves Ecosystem) - July 2022 depeg
+  - name: USDN
+    coingecko_id: usdn
+    anchor: 1.0
+    token_id: "0x674C6Ad92Fd080e4004b2312b45f796a192D27a0"
+    start: "2022-06-01"
+    end: "2022-08-01"
+
+  # LUSD - 2022年 events
+  - name: LUSD
+    coingecko_id: lusd
+    anchor: 1.0
+    token_id: "0x5f98805a04e6e7b5a1d2afc92d2a1f07d380ce9a"
+    start: "2022-01-10"
+    end: "2022-03-10"
+
+  # FEI - 2021年 depeg events
+  - name: FEI
+    coingecko_id: fei-usd
+    anchor: 1.0
+    token_id: "0x956f47f50a8621630a8de951fe8a014c9e0d5b9a"
+    start: "2021-04-01"
+    end: "2021-06-01"
+
+  # sUSD - 2020-2021 depeg events
+  - name: sUSD
+    coingecko_id: nusd
+    anchor: 1.0
+    token_id: "0x57ab1ec28d129707052df4d418731afb3d0aa0d"
+    start: "2020-11-01"
+    end: "2021-02-01"
+
+  # USDT - multiple depeg events
+  - name: USDT
+    coingecko_id: tether
+    anchor: 1.0
+    token_id: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    start: "2022-04-01"
+    end: "2022-06-01"
+
+  # USDS - December 2025 to January 2026
+  - name: USDS
+    coingecko_id: usds
+    anchor: 1.0
+    token_id: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+    start: "2025-12-01"
+    end: "2026-01-01"
+
+  # GUSD - Gemini Dollar (2023 年银行危机期间)
+  - name: GUSD
+    coingecko_id: gemini-dollar
+    anchor: 1.0
+    token_id: "0x056fd409e1d7a124bd7017459dfea2f387b6d5cd"
+    coinbase: "GUSD-USD"
+    start: "2023-02-01"
+    end: "2023-04-01"
+
+  # BUSD - Binance USD (2023 年监管危机)
+  - name: BUSD
+    coingecko_id: binance-usd
+    anchor: 1.0
+    token_id: "0x4fabb145d64652a948d72533023f6e7a623c7c53"
+    binance: "BUSDUSDT"
+    start: "2023-02-01"
+    end: "2023-04-01"
+
+  # MIM - Magic Internet Money (2022 年脱锚事件)
+  - name: MIM
+    coingecko_id: magic-internet-money
+    anchor: 1.0
+    token_id: "0x99d8a9c45b2eca8864373a26d1459e3dff1e17f3"
+    start: "2022-05-01"
+    end: "2022-07-01"
+
+# Curve stablecoin pools
+curve_pools:
+  UST:
+    pool_address: "0x890f6cd2d6a93f3d2bf2b24b28fb7f3d5fb2d3c"
+    anchor: 1.0
+    start: "2022-04-01"
+    end: "2022-07-01"
+  USDN:
+    pool_address: "0x4f3E8F405CF5aFC05D68142F3783bDfE13811522"
+    anchor: 1.0
+    start: "2022-06-01"
+    end: "2022-08-01"
+  sUSD:
+    pool_address: "0xc25a3a3b969415c80451098fa907ec722572917f"
+    anchor: 1.0
+    start: "2025-03-01"
+    end: "2025-05-01"
+  DEI:
+    pool_address: "0x5F890651b14b8d3334E84776A9f9dE1A95d42eA"
+    anchor: 1.0
+    start: "2022-05-01"
+    end: "2022-06-15"
+
+markout_window: 3600
+markout_window_5min: 300
+
+base_token: "USDC"
+
+# 默认数据保存路径
+data_path:
+  raw: "data/raw data"
+  processed: "data"
+
+# BOCD 模型配置
+bocd:
+  hazard_rate: 200
+  truncate_threshold: 0.0001
+
+# CCXT 交易所配置 (用于 OHLCV 数据)
+ohlcv:
+  exchanges: ["binance", "coinbase", "okx", "gate", "kucoin", "xt", "bybit"]
+  timeframe: "1m"
+  limit: 1000
+  symbols:
+    USDC:
+      binance: "USDC/USDT"
+      coinbase: "USDC/USDT"
+      okx: "USDC/USDT"
+      kucoin: "USDC/USDT"
+      bybit: "USDC/USDT"
+    USDT:
+      binance: "USDT/USDT"
+      coinbase: "USDT/USD"
+      okx: "USDT/USDT"
+      kucoin: "USDT/USDT"
+      bybit: "USDT/USDT"
+    DAI:
+      binance: "DAI/USDT"
+      coinbase: "DAI/USD"
+      okx: "DAI/USDT"
+      kucoin: "DAI/USDT"
+      bybit: "DAI/USDT"
+    FRAX:
+      binance: "FRAX/USDT"
+      coinbase: "FRAX/USD"
+      okx: "FRAX/USDT"
+      kucoin: "FRAX/USDT"
+      bybit: "FRAX/USDT"
+    TUSD:
+      binance: "TUSD/USDT"
+      coinbase: "TUSD/USD"
+      okx: "TUSD/USDT"
+      kucoin: "TUSD/USDT"
+      bybit: "TUSD/USDT"
+    LUSD:
+      binance: "LUSD/USDT"
+      coinbase: "LUSD/USD"
+      okx: "LUSD/USDT"
+      kucoin: "LUSD/USDT"
+      bybit: "LUSD/USDT"
+    USDe:
+      binance: "USDE/USDT"
+      coinbase: "USDE/USDT"
+      okx: "USDE/USDT"
+      kucoin: "USDE/USDT"
+      bybit: "USDE/USDT"
+    UST:
+      binance: "USTC/USDT"
+      coinbase: "USTC/USD"
+      okx: "USTC/USDT"
+      kucoin: "USTC/USDT"
+      bybit: "USTC/USDT"
+    sUSD:
+      binance: "SUSD/USDT"
+      coinbase: "SUSD/USD"
+      okx: "SUSD/USDT"
+      kucoin: "SUSD/USDT"
+      bybit: "SUSD/USDT"
+    DEI:
+      binance: "DEI/USDT"
+      okx: "DEI/USDT"
+      kucoin: "DEI/USDT"
+      bybit: "DEI/USDT"
+    IRON:
+      binance: "IRON/USDT"
+      coinbase: "IRON/USD"
+      okx: "IRON/USDT"
+      kucoin: "IRON/USDT"
+      bybit: "IRON/USDT"
+    USDN:
+      binance: "USDN/USDT"
+      coinbase: "USDN/USD"
+      okx: "USDN/USDT"
+      kucoin: "USDN/USDT"
+      bybit: "USDN/USDT"
+    xUSD:
+      binance: "XUSD/USDT"
+      okx: "XUSD/USDT"
+      kucoin: "XUSD/USDT"
+      bybit: "XUSD/USDT"
+    USDG:
+      okx: "USDG/USDT"
+      gate: "USDG/USDT"
+      kucoin: "USDG/USDT"
+      xt: "USDG/USDT"
+    USDY:
+      bybit: "USDY/USDT"
+    EURC:
+      coinbase: "EURC/USDC"
+
+depeg:
+  threshold_pct: 5
+  min_duration_hours: 6
+
+prediction:
+  horizons: [6, 24, 168]
+  windows: [6, 12, 24, 48, 72]
+
+model:
+  rf_n_estimators: 200
+  rf_max_depth: 10
+  xgb_n_estimators: 200
+  xgb_max_depth: 6
