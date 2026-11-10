@@ -1,15 +1,14 @@
 import os
 import pandas as pd
-import ccxt
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil import parser as dateparser
-import time
-import requests
 import yaml
-try:
+if __package__:
+    from .ohlcv_pages import iter_minute_rows, make_exchange
+    from .tools import save_csv_with_backup
+else:
+    from ohlcv_pages import iter_minute_rows, make_exchange
     from tools import save_csv_with_backup
-except ImportError:
-    from src.tools import save_csv_with_backup
 
 # 加载配置
 _config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'config.yaml')
@@ -68,73 +67,23 @@ class OHLCVFetcher:
     def _fetch_from_exchange(self, exchange_id, symbol, since, until):
         """从单个交易所获取数据（同步版本）"""
         try:
-            exchange_class = getattr(ccxt, exchange_id)
-            exchange = exchange_class({
-                'proxies': PROXIES,
-                'enableRateLimit': True,
-                'timeout': 30000,
-            })
-            
-            all_data = []
-            current_since = since * 1000
-            until_ms = until * 1000
-            
-            while current_since < until_ms:
-                try:
-                    ohlcv = exchange.fetch_ohlcv(
-                        symbol,
-                        timeframe='1m',
-                        since=current_since,
-                        limit=1000
-                    )
-                    
-                    if not ohlcv:
-                        break
-                    
-                    first_ts = ohlcv[0][0]
-                    last_ts = ohlcv[-1][0]
-                    
-                    if first_ts > until_ms:
-                        if last_ts > until_ms:
-                            break
-                    
-                    filtered_ohlcv = [k for k in ohlcv if since * 1000 <= k[0] <= until_ms]
-                    
-                    if filtered_ohlcv:
-                        all_data.extend(filtered_ohlcv)
-                    
-                    if last_ts >= until_ms - 60000:
-                        break
-                    
-                    if last_ts <= current_since - 60000:
-                        break
-                    
-                    current_since = last_ts + 60000
-                    time.sleep(0.5)
-                    
-                except Exception as e:
-                    print(f"      错误: {type(e).__name__}: {e}")
-                    break
-            
-            if all_data:
-                df = pd.DataFrame([
-                    {
-                        'timestamp': k[0] // 1000,
-                        'datetime': datetime.fromtimestamp(k[0] // 1000).strftime('%Y-%m-%d %H:%M:%S'),
-                        'open': k[1],
-                        'high': k[2],
-                        'low': k[3],
-                        'close': k[4],
-                        'volume': k[5],
-                        'exchange': exchange_id
-                    }
-                    for k in all_data
-                ])
-                df = df.sort_values('timestamp')
-                return df
-            
-            return None
-            
+            exchange = make_exchange(exchange_id, PROXIES)
+            # The legacy training export includes the configured end time.
+            # Keep its local datetime and CSV columns for existing readers.
+            rows = [
+                {
+                    'timestamp': stamp // 1000,
+                    'datetime': datetime.fromtimestamp(stamp // 1000).strftime('%Y-%m-%d %H:%M:%S'),
+                    'open': values[0],
+                    'high': values[1],
+                    'low': values[2],
+                    'close': values[3],
+                    'volume': values[4],
+                    'exchange': exchange_id,
+                }
+                for stamp, values in iter_minute_rows(exchange, symbol, since * 1000, until * 1000 + 1)
+            ]
+            return pd.DataFrame(rows) if rows else None
         except Exception as e:
             print(f"      错误: {type(e).__name__}: {e}")
             return None

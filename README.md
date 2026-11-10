@@ -47,6 +47,7 @@ pipeline/
     ├── fetch.py               # TheGraph 数据获取（Uniswap V2/V3/V4）
     ├── fetch_price.py         # 多源价格数据（CoinGecko / Binance / Coinbase）
     ├── fetch_ohlcv.py         # 分钟级 K 线（ccxt + 多交易所）
+    ├── collect_ohlcv.py       # OKX USDC/USDT 的独立分钟采集入口
     ├── fetch_curve.py         # Curve 池数据获取
     ├── client.py              # GraphQL 客户端（分页/重试/代理）
     │
@@ -105,6 +106,28 @@ python src/main.py --curve --coin UST
 # 增量更新最近 N 天
 python src/main.py --coin USDC --days 7
 ```
+
+#### 单独试跑 OKX 分钟采集
+
+在仓库目录打开 PowerShell。若尚未安装项目依赖，试跑只需安装 CCXT：
+
+```powershell
+python -m pip install ccxt==4.5.39
+python src/collect_ohlcv.py --once
+```
+
+这会抓取最近 10 个已结束的分钟，把 OKX 确认收盘的数据保存到 `data/collector-preview/`，不需要 API 密钥、`config.yaml` 或数据库。如果要补抓指定时间段，或使用本机 HTTP 代理：
+
+```powershell
+python src/collect_ohlcv.py --once --start 2026-11-07T08:35:00Z --end 2026-11-07T08:45:00Z
+python src/collect_ohlcv.py --once --proxy http://127.0.0.1:7890
+```
+
+时间区间包含起点、不包含终点，`Z` 表示 UTC。价格按 USDT 报价，成交量以 USDC 为单位。缺少的分钟会记在日志里；采集输出与原有训练 CSV 分开放置。
+
+接入 MySQL 时，`--import-bin` 接收新版 Go 导入工具的可执行文件路径。给 `--loop` 指定该路径后，采集器先补写 `--pending-dir` 中的批次，再根据数据库记录继续采集。数据库没有这条行情时，需用 `--bootstrap-from` 指定首次采集起点。指定 `--once --start ... --end ... --import-bin ...` 可走同一待处理目录补录历史。
+
+Go 工具需支持 `-latest-open-time -asset-id ccxt.usdc-usdt -source ccxt:okx -interval 1m`，标准输出为最后一根 K 线的 RFC3339 开盘时间；没有记录时成功退出且标准输出为空。写入时需支持 `-anchor=` 表示不提供锚定价，`-source ccxt` 与 CSV 的 `exchange=okx` 组合为 `ccxt:okx`。已有旧版工具不能用于自动入库。
 
 ### 2. 训练与评估（3 个实验入口）
 
