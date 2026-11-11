@@ -18,6 +18,8 @@ Copy-Item config.example.yaml config.yaml
 
 ## 环境配置
 
+DG Transformer 独立推理、交付打包和 Go 联调见 [INFERENCE.md](INFERENCE.md)。推理以 `src/dg_final.py` 为准；旧 `export_predictions.py` 不作为部署入口。真实权重和配套 scaler 仍需模型方交付。
+
 ```bash
 pip install -r requirements.txt
 ```
