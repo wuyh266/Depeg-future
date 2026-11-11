@@ -1,0 +1,21 @@
+# Validated on Python 3.11.16, CPU. Recorded 2026-11-11.
+--extra-index-url https://download.pytorch.org/whl/cpu
+cloudpickle==3.1.2
+filelock==4.2.10
+fsspec==2026.9.0
+jinja2==3.1.6
+joblib==1.6.0
+markupsafe==3.0.4
+mpmath==1.3.0
+networkx==3.6.1
+numpy==2.2.6
+pandas==2.3.3
+python-dateutil==4.0.0
+pytz==2026.6
+scikit-learn==1.7.2
+scipy==1.17.1
+sympy==1.13.1
+threadpoolctl==3.8.0
+torch==2.5.1+cpu
+typing-extensions==4.16.0
+tzdata==2026.6
