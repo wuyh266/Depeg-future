@@ -45,6 +45,11 @@ def read_input(path, now=None):
         if not {"timestamp", "datetime", "open", "high", "low", "close", "volume", "exchange"}.issubset(reader.fieldnames or []):
             fail("INVALID_INPUT", "缺少 OKX 分钟 K 线字段")
         rows = list(reader)
+    return validate_rows(rows, now)
+
+
+def validate_rows(rows, now=None):
+    """Shared CSV/gRPC validation; neither transport can skip the candle contract."""
     if not rows:
         fail("INSUFFICIENT_DATA", "输入为空")
     result = []
@@ -106,8 +111,30 @@ def load_manifest(folder):
         fail("INVALID_MANIFEST", f"模型约定不合法: {exc}")
 
 
-def infer(rows, folder, device="cpu"):
+def load_runtime(folder, device="cpu"):
+    """Load a fixed model once for a long-lived service; restart to change artifacts."""
+    import torch
+    from dg_final import DGModelFinal, HORIZON_MAP
     m = load_manifest(folder)
+    if device == "cuda" and not torch.cuda.is_available():
+        fail("DEVICE_UNAVAILABLE", "当前环境没有可用 CUDA")
+    checkpoint = torch.load(artifact(folder, m["checkpoint"]), map_location="cpu", weights_only=True)
+    for key in ("seq_len", "horizon", "d_model", "num_env", "stats_dim", "temperature", "gate_floor"):
+        if checkpoint[key] != m[key]:
+            fail("MODEL_INCOMPATIBLE", f"权重与 manifest 的 {key} 不一致")
+    if m["horizon"] not in HORIZON_MAP or list(HORIZON_MAP[m["horizon"]]) != m["label_offsets_minutes"]:
+        fail("MODEL_INCOMPATIBLE", "预测窗口与训练实现不匹配")
+    model = DGModelFinal(input_dim=len(m["feature_columns"]), d_model=m["d_model"], num_env=m["num_env"],
+                         stats_dim=m["stats_dim"], temperature=m["temperature"], gate_floor=m["gate_floor"])
+    model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+    model.to(device)
+    model.eval()
+    return {"manifest": m, "checkpoint": checkpoint, "model": model,
+            "preprocessing": json.loads(artifact(folder, m["preprocessing"]).read_text(encoding="utf-8"))}
+
+
+def infer(rows, folder, device="cpu", runtime=None):
+    m = runtime["manifest"] if runtime else load_manifest(folder)
     needed = m["raw_candles_required"]
     if len(rows) < needed:
         fail("INSUFFICIENT_DATA", f"至少需要 {needed} 根连续已收盘 K 线，收到 {len(rows)} 根")
@@ -133,13 +160,13 @@ def infer(rows, folder, device="cpu"):
     stats_columns = [c for c in STATS if c in columns] if m["stats_columns"] else []
     if stats_columns != m["stats_columns"]:
         fail("MODEL_INCOMPATIBLE", "统计特征顺序不匹配")
-    checkpoint = torch.load(artifact(folder, m["checkpoint"]), map_location="cpu", weights_only=True)
+    checkpoint = runtime["checkpoint"] if runtime else torch.load(artifact(folder, m["checkpoint"]), map_location="cpu", weights_only=True)
     for key in ("seq_len", "horizon", "d_model", "num_env", "stats_dim", "temperature", "gate_floor"):
         if checkpoint[key] != m[key]:
             fail("MODEL_INCOMPATIBLE", f"权重与 manifest 的 {key} 不一致")
     if m["horizon"] not in HORIZON_MAP or list(HORIZON_MAP[m["horizon"]]) != m["label_offsets_minutes"]:
         fail("MODEL_INCOMPATIBLE", "预测窗口与训练实现不匹配")
-    prep = json.loads(artifact(folder, m["preprocessing"]).read_text(encoding="utf-8"))
+    prep = runtime["preprocessing"] if runtime else json.loads(artifact(folder, m["preprocessing"]).read_text(encoding="utf-8"))
 
     def scaler(name, size):
         spec = prep[name]
@@ -150,10 +177,13 @@ def infer(rows, folder, device="cpu"):
         obj.mean_, obj.scale_, obj.n_features_in_ = mean, scale, size
         return obj
 
-    model = DGModelFinal(input_dim=len(columns), d_model=m["d_model"], num_env=m["num_env"],
-                         stats_dim=m["stats_dim"], temperature=m["temperature"], gate_floor=m["gate_floor"])
-    model.load_state_dict(checkpoint["model_state_dict"], strict=True)
-    model.to(device)
+    if runtime:
+        model = runtime["model"]
+    else:
+        model = DGModelFinal(input_dim=len(columns), d_model=m["d_model"], num_env=m["num_env"],
+                             stats_dim=m["stats_dim"], temperature=m["temperature"], gate_floor=m["gate_floor"])
+        model.load_state_dict(checkpoint["model_state_dict"], strict=True)
+        model.to(device)
     stats = features[-1:, [columns.index(c) for c in stats_columns]] if stats_columns else None
     prediction = float(predict_batch(model, features[None, :, :], stats,
                        scaler("features", len(columns)), scaler("stats", len(stats_columns)) if stats_columns else None, device)[0])

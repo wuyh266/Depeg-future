@@ -18,6 +18,8 @@ Copy-Item config.example.yaml config.yaml
 
 ## 环境配置
 
+2026-11-21：新增可选本地 gRPC 服务 `src/grpc_server.py`，依赖见 `requirements-grpc.txt`。它复用离线推理、常驻加载模型；协议与 Go 调用方法见相邻 Depeg 仓库的 `docs/grpc-inference.md`。原有 CSV/JSON 入口继续可用，真实权重仍需交付。
+
 DG Transformer 独立推理、交付打包和 Go 联调见 [INFERENCE.md](INFERENCE.md)。推理以 `src/dg_final.py` 为准；旧 `export_predictions.py` 不作为部署入口。真实权重和配套 scaler 仍需模型方交付。
 
 ```bash
