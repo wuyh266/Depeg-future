@@ -1,0 +1,5 @@
+-r requirements-inference.txt
+grpcio==1.76.0
+grpcio-health-checking==1.76.0
+protobuf==6.33.6
+# Only needed to regenerate bindings: grpcio-tools==1.76.0
